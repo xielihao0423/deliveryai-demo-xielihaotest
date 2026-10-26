@@ -7,9 +7,14 @@ async function loginWith(page: Page, username: string, password: string) {
   await page.getByRole('button', { name: '登录' }).click()
 }
 
+/** 跳转指定路由，使用 domcontentloaded 避免 vite HMR 导致 load 事件偶发超时 */
+async function open(page: Page, url: string) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
+}
+
 /** 登录到大盘页面（用于需要已登录态的用例） */
 async function loginToDashboard(page: Page) {
-  await page.goto('/login')
+  await open(page, '/login')
   await loginWith(page, 'admin', 'admin123')
   await expect(page).toHaveURL(/\/dashboard/)
 }
@@ -26,7 +31,7 @@ async function firstChartXAxisTickCount(page: Page): Promise<number> {
 test.describe('业务总览大盘 - E2E 验收测试', () => {
   test.beforeEach(async ({ page }) => {
     // 建立页面 origin 后一次性清除登录态，避免在后续导航中重复清除
-    await page.goto('/login')
+    await open(page, '/login')
     await page.evaluate(() => {
       try {
         window.localStorage.removeItem('dashboard_auth')
@@ -37,13 +42,13 @@ test.describe('业务总览大盘 - E2E 验收测试', () => {
   })
 
   test('AUTH-001: 未登录访问 /dashboard 被重定向到登录页', async ({ page }) => {
-    await page.goto('/dashboard')
+    await open(page, '/dashboard')
     await expect(page).toHaveURL(/\/login/)
     await expect(page.getByRole('heading', { name: '欢迎登录' })).toBeVisible()
   })
 
   test('AUTH-002: 登录失败时提示错误并保留用户名、清空密码', async ({ page }) => {
-    await page.goto('/login')
+    await open(page, '/login')
     await loginWith(page, 'wrong', 'wrong')
     await expect(page.getByText('用户名或密码错误')).toBeVisible()
     // 用户名保留
@@ -55,13 +60,13 @@ test.describe('业务总览大盘 - E2E 验收测试', () => {
   })
 
   test('AUTH-003: 空凭据提交时给出空值提示', async ({ page }) => {
-    await page.goto('/login')
+    await open(page, '/login')
     await page.getByRole('button', { name: '登录' }).click()
     await expect(page.getByText('请输入用户名和密码')).toBeVisible()
   })
 
   test('AUTH-004: 正确凭据登录后跳转回大盘页面', async ({ page }) => {
-    await page.goto('/dashboard')
+    await open(page, '/dashboard')
     await expect(page).toHaveURL(/\/login/)
     await loginWith(page, 'admin', 'admin123')
     await expect(page).toHaveURL(/\/dashboard/)
@@ -147,7 +152,7 @@ test.describe('业务总览大盘 - E2E 验收测试', () => {
     await page.getByRole('button', { name: '退出登录' }).click()
     await expect(page).toHaveURL(/\/login/)
     // 重新访问大盘应被拦截
-    await page.goto('/dashboard')
+    await open(page, '/dashboard')
     await expect(page).toHaveURL(/\/login/)
   })
 
@@ -160,8 +165,8 @@ test.describe('业务总览大盘 - E2E 验收测试', () => {
     expect(firstTime).toBeTruthy()
     // 等待至少 1 秒后重新进入大盘，触发重新加载
     await page.waitForTimeout(1100)
-    await page.goto('/login')
-    await page.goto('/dashboard')
+    await open(page, '/login')
+    await open(page, '/dashboard')
     await expect(page.getByRole('heading', { name: '业务总览大盘' })).toBeVisible()
     const timeEl2 = page.getByText(timeRe)
     await expect(timeEl2).toBeVisible()
@@ -176,7 +181,7 @@ test.describe('业务总览大盘 - E2E 验收测试', () => {
   })
 
   test('REGRESS-001: 现有火锅点单首页仍可正常访问，大盘改动未影响主流程', async ({ page }) => {
-    await page.goto('/')
+    await open(page, '/')
     await expect(page).toHaveURL(/\/$/)
     // 首页绑定餐桌标题存在
     await expect(page.getByText(/热气升腾/)).toBeVisible()
