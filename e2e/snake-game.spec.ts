@@ -21,17 +21,23 @@ const speedLevelValue = (page: Page) => page.locator('.sa-row > .sa-card').nth(1
 const statusLabel = (page: Page) => page.locator('.sa-status')
 
 /**
- * Override Math.random so foods are placed at pre-computed grid positions
- * along the snake's straight rightward path (cells (12,10) → (19,10)).
- * Snake starts at head (9,10) moving right; each food is 2-3 cells ahead.
+ * Override Math.random so foods are placed at pre-computed grid positions.
+ * Uses canvas-existence detection: only returns food-sequence values when the
+ * snake game canvas is in the DOM (avoiding page-load Math.random calls).
+ *
+ * React StrictMode double-invokes the effect in dev, so the first canvas-present
+ * call is "wasted" by the discarded first mount. Callers must prepend a dummy
+ * value (e.g. 0.999) to the foods array to account for this.
  */
 function installFoodSequence(page: Page, foods: number[]) {
   void page.addInitScript((seq) => {
     let count = 0
     Math.random = () => {
+      // Only intercept when snake game canvas is present
+      if (!document.querySelector('canvas')) return 0.999
       if (count < seq.length) return seq[count++] as number
       count++
-      return 0.999 // subsequent foods at last free cell, away from snake
+      return 0.999
     }
   }, foods)
 }
@@ -43,15 +49,10 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
   test('REQ-001: 页面加载后显示画布、初始分数0、最高分和开始提示', async ({ page }) => {
     await goToSnakeGame(page)
 
-    // Canvas 渲染区域可见
     await expect(page.locator('canvas')).toBeVisible()
-    // 初始分数为 0
     await expect(scoreValue(page)).toHaveText('0')
-    // 最高分显示区可见
     await expect(highScoreValue(page)).toBeVisible()
-    // 开始提示可见
     await expect(page.getByText('按方向键开始游戏')).toBeVisible()
-    // 状态指示为"等待开始"
     await expect(statusLabel(page)).toContainText('等待开始')
   })
 
@@ -83,7 +84,6 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
     // 按反方向键，应被忽略
     await page.keyboard.press('ArrowLeft')
 
-    // 游戏仍在运行，未结束
     await expect(statusLabel(page)).toContainText('游戏中')
     await expect(page.getByText('Game Over')).not.toBeVisible()
   })
@@ -91,26 +91,23 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
   /* ---------- REQ-003: 食物生成与蛇身增长 ---------- */
 
   test('REQ-003: 蛇吃到食物后分数+10，蛇身增长', async ({ page }) => {
-    // 将第一个食物放置在 (12,10)——蛇头 (9,10) 右侧 3 格，直线可吃到
-    installFoodSequence(page, [247 / 397])
+    // [0] = StrictMode waste, [1] = initial food at (12,10) — 3 cells right of head (9,10)
+    installFoodSequence(page, [0.999, 247 / 397])
 
     await goToSnakeGame(page)
     await page.keyboard.press('ArrowRight')
 
-    // 等待蛇吃到食物（约 3 tick ≈ 450ms）
     await expect(scoreValue(page)).toHaveText('10', { timeout: 5000 })
   })
 
   /* ---------- REQ-004: 碰撞检测与游戏结束 ---------- */
 
   test('REQ-004.1: 蛇撞墙后游戏结束，显示结束面板和重新开始按钮', async ({ page }) => {
-    // 食物远离蛇的右行路径
     installFoodSequence(page, [])
 
     await goToSnakeGame(page)
     await page.keyboard.press('ArrowRight')
 
-    // 蛇从 x=9 到 x=20（越界）约需 11 tick ≈ 1650ms
     await expect(page.getByText('Game Over')).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('button', { name: '重新开始' })).toBeVisible()
   })
@@ -124,12 +121,10 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
     await page.keyboard.press('ArrowRight')
     await expect(statusLabel(page)).toContainText('游戏中')
 
-    // 暂停
     await page.keyboard.press('Space')
     await expect(statusLabel(page)).toContainText('已暂停')
     await expect(page.getByText('按空格继续')).toBeVisible()
 
-    // 恢复
     await page.keyboard.press('Space')
     await expect(statusLabel(page)).toContainText('游戏中')
     await expect(page.getByText('按空格继续')).not.toBeVisible()
@@ -141,7 +136,6 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
 
     await page.keyboard.press('Space')
 
-    // 仍处于等待开始状态
     await expect(statusLabel(page)).toContainText('等待开始')
     await expect(page.getByText('按方向键开始游戏')).toBeVisible()
   })
@@ -178,54 +172,45 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
   /* ---------- REQ-007: 速度递增 ---------- */
 
   test('REQ-007: 吃5个食物后速度加快一档', async ({ page }) => {
-    // 5 个食物沿蛇右行直线路径排列：(12,10)→(14,10)→(16,10)→(18,10)→(19,10)
+    // [0] = StrictMode waste; [1..5] = foods along snake's rightward path
     installFoodSequence(page, [
-      247 / 397, // food 1 at (12,10)
-      286 / 396, // food 2 at (14,10)
-      325 / 395, // food 3 at (16,10)
-      364 / 394, // food 4 at (18,10)
-      383 / 393, // food 5 at (19,10)
+      0.999,        // StrictMode first mount (discarded)
+      247 / 397,    // food 1 at (12,10)
+      286 / 396,    // food 2 at (14,10)
+      325 / 395,    // food 3 at (16,10)
+      364 / 394,    // food 4 at (18,10)
+      383 / 393,    // food 5 at (19,10)
     ])
 
     await goToSnakeGame(page)
     await page.keyboard.press('ArrowRight')
 
-    // 等待分数达到 50（5 × 10），约 10 tick ≈ 1500ms
     await expect(scoreValue(page)).toHaveText('50', { timeout: 10000 })
-    // 速度档位应为 2（初始 150ms → 135ms，每 5 食物加速一档）
     await expect(speedLevelValue(page)).toHaveText('2')
   })
 
   /* ---------- REQ-008: 最高分记录与降级 ---------- */
 
   test('REQ-008.1/008.2: 最高分通过localStorage持久化，重载后仍显示', async ({ page }) => {
-    // 第一个食物在蛇路径上，吃 1 个后蛇继续右行撞墙
-    installFoodSequence(page, [247 / 397])
+    installFoodSequence(page, [0.999, 247 / 397])
 
     await goToSnakeGame(page)
     await page.keyboard.press('ArrowRight')
 
-    // 吃到食物，分数 10
     await expect(scoreValue(page)).toHaveText('10', { timeout: 5000 })
 
-    // 等待蛇撞墙游戏结束
     await expect(page.getByText('Game Over')).toBeVisible({ timeout: 10000 })
 
-    // 结束面板显示最高分 10
     await expect(page.locator('.o-highscore')).toContainText('10')
-    // 新纪录提示可见
     await expect(page.getByText('🎉 新纪录！')).toBeVisible()
 
-    // 重载页面，重新导航到贪吃蛇游戏页面
     await page.reload()
     await goToSnakeGame(page)
 
-    // 最高分从 localStorage 读取，应显示 10
     await expect(highScoreValue(page)).toHaveText('10', { timeout: 5000 })
   })
 
   test('REQ-008.3: localStorage不可用时游戏主流程不受影响', async ({ page }) => {
-    // 使 localStorage 不可用
     await page.addInitScript(() => {
       Object.defineProperty(window, 'localStorage', {
         get: () => { throw new Error('localStorage not available') },
@@ -234,14 +219,11 @@ test.describe('贪吃蛇游戏 - E2E 验收测试', () => {
 
     await goToSnakeGame(page)
 
-    // 游戏页面正常加载
     await expect(page.locator('canvas')).toBeVisible()
     await expect(scoreValue(page)).toHaveText('0')
     await expect(page.getByText('按方向键开始游戏')).toBeVisible()
-    // 最高分降级为 0
     await expect(highScoreValue(page)).toHaveText('0')
 
-    // 游戏可正常开始
     await page.keyboard.press('ArrowRight')
     await expect(statusLabel(page)).toContainText('游戏中')
   })
