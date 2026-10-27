@@ -10,6 +10,7 @@ import { DemoConsole } from '@/components/DemoConsole'
 import { MenuView } from '@/components/MenuView'
 import { OrderView } from '@/components/OrderView'
 import { ServiceSheet } from '@/components/ServiceSheet'
+import { SnakeGame } from '@/components/SnakeGame'
 import { TopBar } from '@/components/TopBar'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -74,6 +75,10 @@ export default function App() {
 
   if (state.view === 'welcome') {
     return <WelcomeView table={state.table!} onEnter={() => dispatch({ type: 'SET_VIEW', view: 'menu' })} />
+  }
+
+  if (state.view === 'snake-game') {
+    return <SnakeGame onBack={() => changeView('menu')} />
   }
 
   return (

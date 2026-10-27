@@ -38,3 +38,166 @@ html * {
   }
   .scrollbar-none::-webkit-scrollbar { display: none; }
 }
+
+/* ─── 贪吃蛇 · Retro Arcade ─────────────────────────────────────── */
+.snake-arcade {
+  --sa-bg: #fff4cf;
+  --sa-surface: #fffaf0;
+  --sa-surface-warm: #ffdca8;
+  --sa-fg: #2a1810;
+  --sa-muted: #8a6652;
+  --sa-border: #d9aa7a;
+  --sa-border-soft: #efd0ab;
+  --sa-accent: #d24b1f;
+  --sa-accent-on: #ffffff;
+  --sa-success: #3d8f4f;
+  --sa-warn: #f2a93b;
+  --sa-danger: #b83a2f;
+  --sa-canvas-bg: #1a0f0a;
+  --sa-mono: "Courier New", ui-monospace, monospace;
+  background: var(--sa-bg);
+  color: var(--sa-fg);
+  min-height: 100vh;
+}
+.snake-arcade .sa-topnav {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in oklab, var(--sa-bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--sa-border);
+}
+.snake-arcade .sa-topnav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-block: 14px; max-width: 1180px; margin-inline: auto; padding-inline: 36px;
+}
+.snake-arcade .sa-logo {
+  font-family: var(--sa-mono); font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em; color: var(--sa-fg);
+}
+.snake-arcade .sa-logo .accent { color: var(--sa-accent); }
+.snake-arcade .sa-hero { text-align: center; padding-block: 48px 32px; }
+.snake-arcade .sa-hero .eyebrow {
+  font-family: var(--sa-mono); font-size: 13px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--sa-accent); margin: 0 0 12px;
+}
+.snake-arcade .sa-hero h1 {
+  font-family: var(--sa-mono); font-size: clamp(40px, 6vw, 64px); line-height: 1.04;
+  letter-spacing: -0.02em; margin: 0 0 12px; color: var(--sa-fg);
+}
+.snake-arcade .sa-hero h1 .accent { color: var(--sa-accent); }
+.snake-arcade .sa-hero .subtitle { font-size: 18px; color: var(--sa-muted); margin: 0; }
+.snake-arcade .sa-section { padding-block: 32px; max-width: 1180px; margin-inline: auto; padding-inline: 36px; }
+.snake-arcade .sa-layout {
+  display: grid; grid-template-columns: auto 320px; gap: 32px;
+  align-items: start; justify-content: center;
+}
+@media (max-width: 820px) {
+  .snake-arcade .sa-layout { grid-template-columns: 1fr; justify-items: center; }
+  .snake-arcade .sa-panel { width: 420px; }
+}
+.snake-arcade .sa-canvas-wrap {
+  position: relative; width: 420px; height: 420px;
+  background: var(--sa-canvas-bg); border: 4px solid var(--sa-fg);
+  border-radius: 8px; box-shadow: 6px 6px 0 rgba(42, 24, 16, 0.26); overflow: hidden;
+}
+.snake-arcade .sa-canvas-wrap canvas {
+  display: block; width: 400px; height: 400px; margin: 6px; border-radius: 4px;
+}
+.snake-arcade .sa-overlay {
+  position: absolute; inset: 0; display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: color-mix(in oklab, var(--sa-canvas-bg) 82%, transparent);
+  backdrop-filter: blur(4px); z-index: 5; padding: 24px; text-align: center;
+}
+.snake-arcade .sa-overlay.visible { display: flex; }
+.snake-arcade .sa-overlay .o-eyebrow {
+  font-family: var(--sa-mono); font-size: 12px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--sa-warn); margin: 0 0 8px;
+}
+.snake-arcade .sa-overlay .o-title {
+  font-family: var(--sa-mono); font-size: 36px; font-weight: 700;
+  color: var(--sa-surface); margin: 0 0 12px; letter-spacing: -0.01em;
+}
+.snake-arcade .sa-overlay .o-sub {
+  font-family: var(--sa-mono); font-size: 15px; color: var(--sa-surface-warm); margin: 0 0 20px;
+}
+.snake-arcade .sa-overlay .o-score {
+  font-family: var(--sa-mono); font-size: 18px; color: var(--sa-surface-warm); margin: 0 0 8px;
+}
+.snake-arcade .sa-overlay .o-score .num { font-size: 28px; font-weight: 700; color: var(--sa-warn); }
+.snake-arcade .sa-overlay .o-highscore {
+  font-family: var(--sa-mono); font-size: 14px; color: var(--sa-muted); margin: 0 0 20px;
+}
+.snake-arcade .sa-new-record {
+  font-family: var(--sa-mono); font-size: 20px; font-weight: 700; color: var(--sa-warn);
+  margin: 0 0 20px; animation: sa-pulse 1.2s ease-in-out infinite;
+}
+@keyframes sa-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:.85} }
+.snake-arcade .sa-overlay-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px;
+  border-radius: 8px; border: 3px solid var(--sa-accent); background: var(--sa-accent);
+  color: var(--sa-accent-on); font-family: var(--sa-mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 0.02em; transition: transform 0.08s ease, background 150ms ease; cursor: pointer;
+}
+.snake-arcade .sa-overlay-btn:hover { background: color-mix(in oklab, var(--sa-accent), black 8%); transform: translateY(-1px); }
+.snake-arcade .sa-overlay-btn:active { transform: translateY(1px); }
+.snake-arcade .sa-panel { display: flex; flex-direction: column; gap: 16px; width: 320px; }
+.snake-arcade .sa-card {
+  background: var(--sa-surface); border: 2px solid var(--sa-border); border-radius: 12px;
+  padding: 20px; box-shadow: 6px 6px 0 rgba(42, 24, 16, 0.26);
+}
+.snake-arcade .sa-card .c-label {
+  font-family: var(--sa-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--sa-muted); margin: 0 0 8px;
+}
+.snake-arcade .sa-card .c-value {
+  font-family: var(--sa-mono); font-size: 48px; font-weight: 700; line-height: 1;
+  color: var(--sa-fg); letter-spacing: -0.03em; display: inline-block;
+}
+.snake-arcade .sa-card .c-value.sa-pop { animation: sa-score-pop 0.3s ease; }
+@keyframes sa-score-pop { 0%{transform:scale(1);color:var(--sa-fg)} 40%{transform:scale(1.25);color:var(--sa-warn)} 100%{transform:scale(1);color:var(--sa-fg)} }
+.snake-arcade .sa-card.highlight .c-value { color: var(--sa-accent); }
+.snake-arcade .sa-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.snake-arcade .sa-row .sa-card { padding: 16px; }
+.snake-arcade .sa-row .c-value { font-size: 32px; }
+.snake-arcade .sa-status {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px;
+  font-family: var(--sa-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.snake-arcade .sa-status.idle { background: color-mix(in oklab, var(--sa-muted) 14%, transparent); color: var(--sa-muted); }
+.snake-arcade .sa-status.running { background: color-mix(in oklab, var(--sa-success) 16%, transparent); color: var(--sa-success); }
+.snake-arcade .sa-status.paused { background: color-mix(in oklab, var(--sa-warn) 16%, transparent); color: #b87d1a; }
+.snake-arcade .sa-status.gameover { background: color-mix(in oklab, var(--sa-danger) 16%, transparent); color: var(--sa-danger); }
+.snake-arcade .sa-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.snake-arcade .sa-status.running .sa-dot { animation: sa-blink 1s ease-in-out infinite; }
+@keyframes sa-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+.snake-arcade .sa-controls h3 {
+  font-family: var(--sa-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--sa-muted); margin: 0 0 16px;
+}
+.snake-arcade .sa-ctrl-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 8px 0;
+  border-bottom: 1px solid var(--sa-border-soft);
+}
+.snake-arcade .sa-ctrl-row:last-child { border-bottom: 0; }
+.snake-arcade .sa-ctrl-label { font-size: 14px; color: #593625; }
+.snake-arcade .sa-keycap {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px;
+  padding: 0 8px; border: 2px solid var(--sa-border); border-bottom-width: 3px; border-radius: 4px;
+  background: var(--sa-surface-warm); font-family: var(--sa-mono); font-size: 12px; font-weight: 700; color: var(--sa-fg);
+}
+.snake-arcade .sa-keycap-group { display: flex; gap: 4px; }
+.snake-arcade .sa-speed-bar { height: 8px; background: var(--sa-border-soft); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+.snake-arcade .sa-speed-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--sa-success), var(--sa-warn), var(--sa-danger)); transition: width 240ms ease; }
+.snake-arcade .sa-foot {
+  padding-block: 32px; border-top: 2px solid var(--sa-border); color: var(--sa-muted);
+  font-size: 13px; font-family: var(--sa-mono); max-width: 1180px; margin-inline: auto; padding-inline: 36px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+}
+.snake-arcade .sa-back-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px;
+  border: 2px solid var(--sa-border); background: var(--sa-surface); color: var(--sa-fg);
+  font-family: var(--sa-mono); font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background 150ms ease;
+}
+.snake-arcade .sa-back-btn:hover { background: var(--sa-surface-warm); }
