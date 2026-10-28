@@ -55,6 +55,10 @@ export function createApp() {
       res.status(404).json({ error: 'NOT_FOUND', message: '资源不存在' })
       return
     }
+    if (err.message.startsWith('BAD_REQUEST')) {
+      res.status(400).json({ error: 'BAD_REQUEST', message: err.message.replace('BAD_REQUEST: ', '') })
+      return
+    }
     res.status(500).json({ error: 'INTERNAL_ERROR', message: err.message })
   })
 

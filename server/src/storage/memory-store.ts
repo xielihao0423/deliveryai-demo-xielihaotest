@@ -37,11 +37,27 @@ class MemoryStore {
 
   createOrder(tableId: string, cartItems: CartItem[]): Order {
     const orderId = `ord_${randomHex(8)}`
-    const items: OrderItem[] = cartItems.map((item, idx) => ({
-      ...item,
-      uid: `item_${randomHex(8)}_${idx}`,
-      stage: 'submitted' as const,
-    }))
+    const items: OrderItem[] = cartItems.map((item, idx) => {
+      // BUG-001 fix: 使用服务端菜单中的真实价格和名称，忽略客户端传入的 price/name
+      const product = products.find((p) => p.id === item.productId)
+      if (!product) {
+        throw new Error(`BAD_REQUEST: 菜品不存在: ${item.productId}`)
+      }
+      // BUG-002 fix: 校验数量为正整数
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+        throw new Error(`BAD_REQUEST: 数量必须为正整数: ${item.quantity}`)
+      }
+      return {
+        uid: `item_${randomHex(8)}_${idx}`,
+        productId: item.productId,
+        name: product.name,
+        price: product.price,
+        quantity: item.quantity,
+        spec: item.spec || '',
+        orderedBy: item.orderedBy || '',
+        stage: 'submitted' as const,
+      }
+    })
     const order: Order = {
       id: orderId,
       tableId,
