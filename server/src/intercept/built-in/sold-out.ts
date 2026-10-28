@@ -4,7 +4,7 @@ import { getSoldOutProductIds } from '../../data/menu.js'
 export const soldOutInterceptor: InterceptHandler = {
   before(event: InterceptEvent): InterceptEvent | null {
     const items = event.data.items as Array<{ productId: string }> | undefined
-    if (!items || !Array.isArray(items)) {
+    if (!items || !Array.isArray(items) || items.length === 0) {
       ;(event as InterceptEvent & { _interceptReason?: string })._interceptReason = '购物车为空'
       return null
     }

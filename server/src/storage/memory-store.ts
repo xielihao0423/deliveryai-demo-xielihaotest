@@ -37,8 +37,9 @@ class MemoryStore {
 
   createOrder(tableId: string, cartItems: CartItem[]): Order {
     const orderId = `ord_${randomHex(8)}`
-    const items: OrderItem[] = cartItems.map((item) => ({
+    const items: OrderItem[] = cartItems.map((item, idx) => ({
       ...item,
+      uid: `item_${randomHex(8)}_${idx}`,
       stage: 'submitted' as const,
     }))
     const order: Order = {
