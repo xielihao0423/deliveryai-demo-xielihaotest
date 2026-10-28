@@ -1,14 +1,7 @@
-import express, { type Request, type Response } from 'express'
+import { createApp } from './app.js'
 
-const app = express()
+const app = createApp()
 const PORT = 3001
-
-app.get('/ping', (_req: Request, res: Response) => {
-  res.json({
-    message: 'pong',
-    timestamp: new Date().toISOString(),
-  })
-})
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)
