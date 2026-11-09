@@ -25,9 +25,9 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'concurrently -n mock,server,web -c yellow,blue,green "node e2e/mock-agent-server.js" "npm run dev:server" "npm run dev"',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
-    timeout: 30000,
+    timeout: 60000,
   },
 })
