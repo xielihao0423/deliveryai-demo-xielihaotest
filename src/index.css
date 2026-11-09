@@ -1,40 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color: #211f1c; background: #fbf5ea; font-synthesis: none; }
+:root {
+  color: #111827;
+  background: #f3f4f6;
+  font-synthesis: none;
+}
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: #fbf5ea; }
-button, input { font: inherit; }
-::selection { background: #ffddd8; color: #a9231a; }
+body { margin: 0; min-height: 100vh; background: #f3f4f6; font-family: Inter, -apple-system, system-ui, sans-serif; }
+button, input, select, textarea { font: inherit; }
+::selection { background: #dbeafe; color: #1d4ed8; }
 
-/* 老人模式全局基础：放大字号约 1.25 倍 */
-.elderly { font-size: 125%; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-/* 老人模式：增强对比度，提升半透明文字不透明度至 WCAG AA（≥ 4.5:1） */
-.elderly .text-rice-200\/40 { color: rgb(243 230 208 / 0.8); }
-.elderly .text-rice-200\/60 { color: rgb(243 230 208 / 0.9); }
-.elderly .text-white\/30 { color: rgb(255 255 255 / 0.75); }
-.elderly .text-white\/40 { color: rgb(255 255 255 / 0.8); }
-
-/* 老人模式：主要交互元素触控区域 ≥ 44px */
-.elderly button { min-height: 2.2rem; }
-
-/* 界面状态切换平滑过渡 */
-html { transition: background-color 250ms ease, color 250ms ease, font-size 250ms ease; }
-html * {
-  transition-property: background-color, border-color, color, fill, stroke, font-size;
-  transition-duration: 250ms;
-  transition-timing-function: ease;
-}
-
-@layer utilities {
-  .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
-  .paper-noise {
-    background-image: radial-gradient(rgba(170, 110, 60, .08) .7px, transparent .7px);
-    background-size: 12px 12px;
-  }
-  .scrollbar-none::-webkit-scrollbar { display: none; }
-}
+/* Code highlight (rehype-highlight uses hljs classes) */
+.hljs { background: #1e1e2e; color: #cdd6f4; border-radius: 6px; padding: 12px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 13px; }
+.hljs-keyword { color: #cba6f7; }
+.hljs-string { color: #a6e3a1; }
+.hljs-number { color: #fab387; }
+.hljs-comment { color: #6c7086; font-style: italic; }
+.hljs-function { color: #89b4fa; }
+.hljs-title { color: #89b4fa; }
+.hljs-built_in { color: #f9e2af; }
+.hljs-attr { color: #f9e2af; }
+.hljs-params { color: #cdd6f4; }
+.hljs-type { color: #f9e2af; }
+.hljs-meta { color: #6c7086; }
+.hljs-literal { color: #fab387; }
+.hljs-symbol { color: #f5c2e7; }
+.hljs-name { color: #89b4fa; }
+.hljs-selector-class { color: #f9e2af; }
+.hljs-selector-id { color: #f9e2af; }
+.hljs-variable { color: #cdd6f4; }
+.hljs-property { color: #cdd6f4; }
+.hljs-deletion { color: #f38ba8; }
+.hljs-addition { color: #a6e3a1; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }

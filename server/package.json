@@ -1,5 +1,5 @@
 {
-  "name": "hdl-order-demo-server",
+  "name": "agent-hub-server",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -10,9 +10,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "better-sqlite3": "^11.6.0",
+    "cors": "^2.8.5",
     "express": "^4.21.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
     "tsx": "^4.19.2",

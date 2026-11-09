@@ -1,5 +1,4 @@
 {
-    "app_name": "hdl-order-demo",
-    "app_description": "海底捞式餐饮点单与门店履约概念 Demo",
-    "capabilities": []
+  "name": "AgentHub",
+  "description": "Agent 纳管与对话管理平台"
 }

@@ -1,93 +1,106 @@
-# 沸点火锅点单演示
+# AgentHub — Agent 纳管与对话管理平台
 
-一个面向火锅门店场景的移动端点单与履约流程演示项目，用于展示从绑定餐桌、多人点餐到订单履约和结账支付的完整体验。
+Agent 纳管与对话管理平台，支持将 Codex AppServer 或 Trae CLI 纳管为 Agent，提供统一的对话交互、Skill 管理、Session 持久化和飞书双向集成。
 
-> 本项目为概念演示，不代表正式产品。
+## 功能
 
-## 功能介绍
-
-- 绑定餐桌并进入点餐流程
-- 按分类浏览、搜索和选择菜品
-- 配置菜品规格、口味及下单人
-- 多人协同点餐与购物车管理
-- 查看订单制作及上菜进度
-- 呼叫加汤、饮料、餐具和结账服务
-- 模拟菜品售罄、服务响应及履约状态
-- 模拟结账和支付成功流程
-- 支持中英文切换和老人模式
+- **Agent 纳管**：页面化配置 Agent 连接信息，支持连接验证、状态监控（在线/离线/异常）
+- **对话交互**：选择在线 Agent 发起流式对话，支持 Markdown 渲染和代码高亮
+- **Skill 管理**：查看、配置、启用/禁用 Agent 的 Skill 列表
+- **Session 持久化**：对话 Session 持久化存储，支持历史查看、续接、归档
+- **飞书集成**：消息通知 + 双向 Bot 对话（飞书群组中 @Bot 与 Agent 交互）
 
 ## 技术栈
 
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Radix UI
-- i18next
-- Playwright
-
-## 环境要求
-
-- Node.js 18 或更高版本
-- npm 9 或更高版本
+- 前端：React 18 + TypeScript + Vite 6 + Tailwind CSS + Radix UI + React Router
+- 后端：Express 4.21 + TypeScript + tsx
+- 存储：SQLite (better-sqlite3)
+- 流式输出：SSE (Server-Sent Events)
+- 测试：Playwright
 
 ## 本地开发
 
-安装依赖：
-
 ```bash
+# 安装前端依赖
 npm install
+
+# 安装后端依赖
+cd server && npm install && cd ..
+
+# 启动前后端开发服务（需要两个终端）
+npm run dev          # 前端 http://localhost:5173
+npm run dev:server   # 后端 http://localhost:3001
+
+# 或同时启动
+npm run dev:all
 ```
 
-启动开发服务：
-
-```bash
-npm run dev
-```
-
-服务默认运行在 `http://localhost:5173`。如果该端口已被占用，Vite 会自动选择其他可用端口。
+前端开发服务已配置代理，将 `/api` 请求转发到后端 `http://localhost:3001`。
 
 ## 常用命令
 
 ```bash
-# 启动开发服务
+# 前端开发
 npm run dev
 
-# 执行代码检查
+# 前端构建
+npm run build
+
+# 代码检查
 npm run lint
 
-# 构建生产版本
-npm run build
-```
+# 后端开发
+cd server && npm run dev
 
-生产构建产物会生成在 `dist/` 目录。
+# 后端类型检查
+cd server && npm run typecheck
+
+# 后端构建
+cd server && npm run build
+```
 
 ## 项目结构
 
-```text
+```
 .
-├── e2e/                    # Playwright 端到端测试
-├── server/                 # 演示服务端
-├── src/
-│   ├── assets/             # 图片资源
-│   ├── components/         # 页面及通用组件
-│   ├── data/               # 菜单等演示数据
-│   ├── hooks/              # React Hooks
-│   ├── state/              # 订单状态管理
-│   ├── App.tsx             # 应用入口组件
-│   ├── i18n.ts             # 中英文文案
+├── src/                    # 前端源码
+│   ├── api/                # API 客户端
+│   ├── components/         # 页面组件
+│   │   ├── agents/         # Agent 列表与详情
+│   │   ├── chat/           # 对话交互
+│   │   ├── feishu/         # 飞书配置
+│   │   ├── sessions/       # Session 管理
+│   │   └── ui/             # 基础 UI 组件
+│   ├── types/              # TypeScript 类型定义
+│   ├── lib/                # 工具函数
+│   ├── App.tsx             # 应用入口与路由
 │   └── index.css           # 全局样式
+├── server/                 # 后端源码
+│   ├── src/
+│   │   ├── routes/         # API 路由
+│   │   ├── db/             # 数据库初始化
+│   │   ├── adapters/       # Agent 适配器
+│   │   ├── services/       # 业务服务（健康检查、飞书）
+│   │   ├── types/          # 类型定义
+│   │   └── index.ts        # 服务入口
+│   └── package.json
 ├── index.html
-├── tailwind.config.js
-└── vite.config.ts
+├── vite.config.ts
+└── tailwind.config.js
 ```
 
-## 预览模式
+## API 设计
 
-访问以下地址可以直接进入已绑定餐桌并带有购物车数据的菜单预览：
-
-```text
-http://localhost:5173/?preview=menu
-```
-
-实际端口以 Vite 启动日志为准。
+| 接口 | 方法 | 描述 |
+|------|------|------|
+| `/api/agents` | GET | 获取 Agent 列表 |
+| `/api/agents` | POST | 注册 Agent（含连接验证） |
+| `/api/agents/:id` | GET/PUT/DELETE | Agent 详情/编辑/删除 |
+| `/api/agents/:id/skills` | GET | 获取 Skill 列表 |
+| `/api/agents/:id/skills/:skillId` | PUT | 配置/启停 Skill |
+| `/api/sessions` | GET/POST | Session 列表/创建 |
+| `/api/sessions/:id` | GET | Session 详情（含消息） |
+| `/api/sessions/:id/messages` | POST | 发送消息（SSE 流式） |
+| `/api/sessions/:id/archive` | POST | 归档 Session |
+| `/api/feishu/config` | GET/PUT | 飞书配置 |
+| `/api/feishu/webhook` | POST | 飞书 Bot 回调 |
