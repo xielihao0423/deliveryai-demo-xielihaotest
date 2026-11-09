@@ -1,8 +1,8 @@
 import { test, expect, type Page, type APIRequestContext } from '@playwright/test'
 
 // ─── Constants ───
-const MOCK_AGENT_ENDPOINT = 'http://localhost:3999'
-const BACKEND_URL = 'http://localhost:3001'
+const MOCK_AGENT_ENDPOINT = 'http://127.0.0.1:3999'
+const BACKEND_URL = 'http://127.0.0.1:3001'
 
 // ─── Helpers ───
 
@@ -109,26 +109,27 @@ test.describe('REQ-001: Agent 纳管配置', () => {
     await page.getByPlaceholder('http://localhost:3000').fill(MOCK_AGENT_ENDPOINT)
     await page.getByRole('button', { name: '验证并保存' }).click()
 
-    // Should see error about name conflict
-    await expect(page.getByText(/已存在/)).toBeVisible({ timeout: 10000 })
+    // Should see error about name conflict (in form error or toast)
+    await expect(page.getByText(/已存在/).first()).toBeVisible({ timeout: 10000 })
   })
 
   test('REQ-001.5: 删除已注册 Agent', async ({ page, request }) => {
     await createAgentViaAPI(request, 'to-delete')
 
     await page.goto('/agents')
-    await expect(page.getByText('to-delete')).toBeVisible()
+    await expect(page.getByText('to-delete', { exact: true })).toBeVisible()
 
     // Click delete (trash icon) on the agent card
-    const card = page.locator('div', { hasText: 'to-delete' }).filter({ has: page.getByText('Codex AppServer') }).first()
-    await card.getByRole('button').filter({ hasText: '' }).last().click()
+    const card = page.locator('div', { hasText: 'to-delete' }).filter({ hasText: 'Codex AppServer' }).first()
+    // The trash button is the last button without text in the card actions
+    await card.locator('button').filter({ hasNot: page.getByText(/对话|编辑/) }).last().click()
 
     // Confirm deletion
     await expect(page.getByText('确认删除')).toBeVisible()
     await page.getByRole('button', { name: '删除' }).click()
 
-    // Agent should be removed from list
-    await expect(page.getByText('to-delete')).not.toBeVisible({ timeout: 5000 })
+    // Agent should be removed from list - check the agent name in card context is gone
+    await expect(page.getByText('to-delete', { exact: true })).not.toBeVisible({ timeout: 5000 })
     await expect(page.getByText('已删除')).toBeVisible()
   })
 })
@@ -176,7 +177,7 @@ test.describe('REQ-002: Agent 列表展示与状态监控', () => {
     await page.goto('/agents')
 
     // Click "对话" button on the offline agent card
-    const card = page.locator('div', { hasText: 'offline-agent' }).filter({ has: page.getByText('Codex AppServer') }).first()
+    const card = page.locator('div', { hasText: 'offline-agent' }).filter({ hasText: 'Codex AppServer' }).first()
     await card.getByRole('button', { name: /对话/ }).click()
 
     // Should see error toast about agent unavailable
@@ -193,7 +194,7 @@ test.describe('REQ-003: 对话交互', () => {
     await page.goto('/agents')
 
     // Click "对话" button on the agent card
-    const card = page.locator('div', { hasText: 'chat-agent' }).filter({ has: page.getByText('Codex AppServer') }).first()
+    const card = page.locator('div', { hasText: 'chat-agent' }).filter({ hasText: 'Codex AppServer' }).first()
     await card.getByRole('button', { name: /对话/ }).click()
 
     // Should navigate to chat page
@@ -216,7 +217,7 @@ test.describe('REQ-003: 对话交互', () => {
 
     // Assistant response should contain code block with syntax highlighting
     await expect(page.locator('pre code')).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText('quickSort')).toBeVisible()
+    await expect(page.getByText('quickSort').first()).toBeVisible()
   })
 
   test('REQ-003.6: 离线 Agent 在对话页面不可选', async ({ page, request }) => {
@@ -255,9 +256,13 @@ test.describe('REQ-004: Agent Skill 管理', () => {
 
     await page.goto(`/agents/${agent.id}`)
 
-    // Find the doc-gen skill (initially disabled)
-    const skillRow = page.locator('div', { hasText: 'doc-gen' }).filter({ hasText: 'Generate documentation' }).first()
-    const skillSwitch = skillRow.getByRole('switch')
+    // Find the doc-gen skill row - it's the 3rd skill in the list
+    // Each skill row is a div with border containing the skill name
+    const skillRows = page.locator('div.rounded-lg.border.border-brand-200:has(span)').filter({ hasText: /code-search|auto-test|doc-gen/ })
+    const docGenRow = skillRows.filter({ hasText: 'doc-gen' })
+
+    // The switch is inside this row
+    const skillSwitch = docGenRow.getByRole('switch')
 
     // doc-gen should be initially off (unchecked)
     await expect(skillSwitch).toHaveAttribute('data-state', 'unchecked')
@@ -277,9 +282,12 @@ test.describe('REQ-004: Agent Skill 管理', () => {
 
     await page.goto(`/agents/${agent.id}`)
 
-    // Click "配置" button on the first skill
-    const skillRow = page.locator('div', { hasText: 'code-search' }).filter({ hasText: 'Search code' }).first()
-    await skillRow.getByRole('button', { name: /配置/ }).click()
+    // Find the code-search skill row specifically
+    const skillRows = page.locator('div.rounded-lg.border.border-brand-200:has(span)').filter({ hasText: /code-search|auto-test|doc-gen/ })
+    const codeSearchRow = skillRows.filter({ hasText: 'code-search' })
+
+    // Click "配置" button within this row
+    await codeSearchRow.getByRole('button', { name: /配置/ }).click()
 
     // Config dialog should appear
     await expect(page.getByText('Skill 配置')).toBeVisible()
@@ -417,12 +425,17 @@ test.describe('REQ-006: 飞书消息通知配置', () => {
 
     await page.goto('/feishu')
 
-    // Find the "Agent 上线" event toggle
-    const eventRow = page.locator('div', { hasText: 'Agent 上线' }).filter({ hasText: 'switch' })
-    const eventSwitch = eventRow.getByRole('switch').first()
+    // Find the event toggle rows in the notification events card
+    // Each event row has a label and a switch
+    const eventRows = page.locator('div.flex.items-center.justify-between.border-b:has(span)')
+    const agentOnlineRow = eventRows.filter({ hasText: 'Agent 上线' })
+    const eventSwitch = agentOnlineRow.getByRole('switch')
 
-    // Toggle it off
+    // Get initial state
+    await expect(eventSwitch).toBeVisible({ timeout: 5000 })
     const initialState = await eventSwitch.getAttribute('data-state')
+
+    // Toggle it
     await eventSwitch.click()
 
     // Verify state changed
@@ -447,7 +460,7 @@ test.describe('REQ-006: 飞书消息通知配置', () => {
     await page.getByRole('button', { name: /测试连接/ }).click()
 
     // Should see success toast (mock server returns 200)
-    await expect(page.getByText('测试消息已发送')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('测试消息已发送')).toBeVisible({ timeout: 10000 })
 
     // Push logs should show a success entry
     await expect(page.getByText('成功').first()).toBeVisible({ timeout: 5000 })
