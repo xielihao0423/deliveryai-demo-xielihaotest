@@ -271,7 +271,7 @@ test.describe('REQ-004: Agent Skill 管理', () => {
     await skillSwitch.click()
 
     // Should see success toast
-    await expect(page.getByText(/已启用/)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(/已启用/).first()).toBeVisible({ timeout: 5000 })
 
     // Switch should now be checked
     await expect(skillSwitch).toHaveAttribute('data-state', 'checked')
@@ -300,7 +300,7 @@ test.describe('REQ-004: Agent Skill 管理', () => {
     await page.getByRole('button', { name: '保存配置' }).click()
 
     // Should see success toast
-    await expect(page.getByText('Skill 配置已保存')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('Skill 配置已保存').first()).toBeVisible({ timeout: 5000 })
   })
 })
 
