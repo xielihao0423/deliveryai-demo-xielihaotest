@@ -72,7 +72,7 @@ test.describe('REQ-001: Agent 纳管配置', () => {
     await createAgentViaUI(page, 'codex-test', MOCK_AGENT_ENDPOINT)
 
     // Wait for toast success notification
-    await expect(page.getByText('Agent 创建成功')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Agent 创建成功').first()).toBeVisible({ timeout: 10000 })
 
     // Agent card should appear in list with online status
     await expect(page.getByText('codex-test')).toBeVisible()
@@ -90,7 +90,7 @@ test.describe('REQ-001: Agent 纳管配置', () => {
     await page.getByRole('button', { name: '验证并保存' }).click()
 
     // Agent created but status should NOT be online (offline or error)
-    await expect(page.getByText('Agent 创建成功')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Agent 创建成功').first()).toBeVisible({ timeout: 10000 })
 
     // Agent should appear in list but not online
     await expect(page.getByText('bad-agent')).toBeVisible()
@@ -130,7 +130,7 @@ test.describe('REQ-001: Agent 纳管配置', () => {
 
     // Agent should be removed from list - check the agent name in card context is gone
     await expect(page.getByText('to-delete', { exact: true })).not.toBeVisible({ timeout: 5000 })
-    await expect(page.getByText('已删除')).toBeVisible()
+    await expect(page.getByText('已删除').first()).toBeVisible()
   })
 })
 
@@ -350,7 +350,7 @@ test.describe('REQ-005: 对话 Session 持久化管理', () => {
     await row.getByRole('button', { name: /归档/ }).click()
 
     // Should see success toast
-    await expect(page.getByText('已归档')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('已归档').first()).toBeVisible({ timeout: 5000 })
 
     // Switch to archived tab
     await page.getByRole('button', { name: '已归档' }).click()
@@ -409,7 +409,7 @@ test.describe('REQ-006: 飞书消息通知配置', () => {
     await page.getByRole('button', { name: '保存配置' }).click()
 
     // Should see success toast
-    await expect(page.getByText('配置已保存')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('配置已保存').first()).toBeVisible({ timeout: 5000 })
   })
 
   test('REQ-006.2: 切换通知事件启停', async ({ page, request }) => {
