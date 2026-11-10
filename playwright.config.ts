@@ -24,10 +24,24 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-    timeout: 30000,
-  },
+  webServer: [
+    {
+      command: 'node e2e/mock-agent-server.js',
+      url: 'http://localhost:3999/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 15000,
+    },
+    {
+      command: 'cd server && npx tsx src/index.ts',
+      url: 'http://localhost:3001/ping',
+      reuseExistingServer: !process.env.CI,
+      timeout: 30000,
+    },
+    {
+      command: 'npx vite --host 0.0.0.0',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+      timeout: 30000,
+    },
+  ],
 })

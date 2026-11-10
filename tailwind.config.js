@@ -4,18 +4,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        rice: { 50: '#fffdf8', 100: '#fbf5ea', 200: '#f3e6d0' },
-        chili: { 50: '#fff1ef', 100: '#ffddd8', 500: '#e13b2b', 600: '#c92f21', 700: '#a9231a' },
-        amber: { 100: '#fff2c7', 400: '#f5b83f', 500: '#e69b18' },
-        charcoal: { 500: '#5f5b55', 700: '#34312d', 900: '#211f1c' },
+        brand: {
+          50: '#f3f4f6',
+          100: '#e5e7eb',
+          200: '#d1d5db',
+          300: '#9ca3af',
+          400: '#6b7280',
+          500: '#4b5563',
+          600: '#374151',
+          700: '#1f2937',
+          800: '#111827',
+          900: '#030712',
+        },
+        success: { 50: '#dcfce7', 100: '#bbf7d0', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+        warning: { 50: '#fef3c7', 100: '#fde68a', 500: '#f59e0b', 600: '#d97706', 700: '#92400e' },
+        danger: { 50: '#fee2e2', 100: '#fecaca', 500: '#ef4444', 600: '#dc2626', 700: '#991b1b' },
+        info: { 50: '#dbeafe', 100: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
       },
-      boxShadow: {
-        card: '0 10px 30px rgba(70, 45, 25, 0.08)',
-        float: '0 18px 55px rgba(78, 34, 20, 0.18)',
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'system-ui', 'Segoe UI', 'sans-serif'],
+        mono: ['Fira Code', 'ui-monospace', 'SF Mono', 'Menlo', 'monospace'],
       },
-      fontFamily: { sans: ['Inter', 'Noto Sans SC', 'system-ui', 'sans-serif'] },
-      keyframes: { rise: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } },
-      animation: { rise: 'rise .35s ease-out both' },
+      animation: {
+        'slide-in': 'slideIn 0.2s cubic-bezier(0.2, 0, 0, 1) both',
+        'fade-in': 'fadeIn 0.15s ease-out both',
+      },
+      keyframes: {
+        slideIn: {
+          '0%': { opacity: '0', transform: 'translateX(20px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
     },
   },
   plugins: [],

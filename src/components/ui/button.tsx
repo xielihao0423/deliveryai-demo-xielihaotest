@@ -3,16 +3,22 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-chili-500 disabled:pointer-events-none disabled:opacity-50 active:scale-95',
+  'inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-900 disabled:pointer-events-none disabled:opacity-50 active:scale-95',
   {
     variants: {
       variant: {
-        default: 'bg-chili-500 text-white shadow-md hover:bg-chili-600',
-        secondary: 'bg-rice-200 text-charcoal-900 hover:bg-amber-100',
-        outline: 'border border-charcoal-900/10 bg-white text-charcoal-900 hover:border-chili-500/30 hover:bg-chili-50',
-        ghost: 'text-charcoal-700 hover:bg-rice-200',
+        default: 'bg-brand-900 text-white hover:bg-brand-800 shadow-sm',
+        secondary: 'bg-white text-brand-800 border border-brand-200 hover:bg-brand-50',
+        outline: 'border border-brand-200 bg-white text-brand-700 hover:border-brand-300 hover:bg-brand-50',
+        ghost: 'text-brand-700 hover:bg-brand-50',
+        danger: 'bg-danger-600 text-white hover:bg-danger-700',
       },
-      size: { default: 'h-11 px-5', sm: 'h-9 rounded-lg px-3', icon: 'h-11 w-11 p-0' },
+      size: {
+        default: 'h-9 px-4',
+        sm: 'h-8 rounded-md px-3 text-xs',
+        icon: 'h-9 w-9 p-0',
+        xs: 'h-7 rounded px-2 text-xs',
+      },
     },
     defaultVariants: { variant: 'default', size: 'default' },
   },
@@ -20,7 +26,9 @@ const buttonVariants = cva(
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {}
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, ...props }, ref) => (
-  <button ref={ref} className={cn(buttonVariants({ variant, size, className }))} {...props} />
-))
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, ...props }, ref) => (
+    <button ref={ref} className={cn(buttonVariants({ variant, size, className }))} {...props} />
+  ),
+)
 Button.displayName = 'Button'
