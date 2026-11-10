@@ -99,9 +99,11 @@ export function AgentFormModal({ open, onOpenChange, editAgent, onSaved }: Props
               className="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-900"
               value={endpoint}
               onChange={e => setEndpoint(e.target.value)}
-              placeholder="http://localhost:3000"
+              placeholder="traex 或 http://localhost:7331/acp"
             />
-            <p className="mt-1 text-xs text-brand-400">Agent 的连接端点地址</p>
+            <p className="mt-1 text-xs text-brand-400">
+              HTTP 地址（http://…）或命令路径（如 <code className="font-mono">traex</code>、<code className="font-mono">/usr/local/bin/traex acp serve</code>）
+            </p>
           </div>
 
           <div>
